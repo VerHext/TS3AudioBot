@@ -107,6 +107,9 @@ namespace TS3AudioBot
 		[Command("bot name", "Gives the bot a new name.")]
 		public static void CommandBotName(ExecutionInformation info, string name) => info.Bot.QueryConnection.ChangeName(name).UnwrapThrow();
 
+		[Command("bot badges", "Set your bot a badge. The badges string starts with 'overwolf=0:badges='")]
+		public static void CommandBotBadges(ExecutionInformation info, string badgesString) => info.Bot.QueryConnection.ChangeBadges(badgesString).UnwrapThrow();
+
 		[Command("bot setup", "Sets all teamspeak rights for the bot to be fully functional.")]
 		[RequiredParameters(0)]
 		public static void CommandBotSetup(ExecutionInformation info, string adminToken)
@@ -260,16 +263,16 @@ namespace TS3AudioBot
 
 			switch (target)
 			{
-			case BotCommand targetB:
-				return new JsonSingleValue<string>(targetB.GetHelp());
-			case CommandGroup targetCg:
-				var subList = targetCg.Commands.Select(g => g.Key).ToArray();
-				return new JsonArray<string>("The command contains the following subfunctions: " + string.Join(", ", subList), subList);
-			case OverloadedFunctionCommand targetOfc:
-				var strb = new StringBuilder();
-				foreach (var botCom in targetOfc.Functions.OfType<BotCommand>())
-					strb.Append(botCom.GetHelp());
-				return new JsonSingleValue<string>(strb.ToString());
+				case BotCommand targetB:
+					return new JsonSingleValue<string>(targetB.GetHelp());
+				case CommandGroup targetCg:
+					var subList = targetCg.Commands.Select(g => g.Key).ToArray();
+					return new JsonArray<string>("The command contains the following subfunctions: " + string.Join(", ", subList), subList);
+				case OverloadedFunctionCommand targetOfc:
+					var strb = new StringBuilder();
+					foreach (var botCom in targetOfc.Functions.OfType<BotCommand>())
+						strb.Append(botCom.GetHelp());
+					return new JsonSingleValue<string>(strb.ToString());
 			}
 
 			throw new CommandException("Seems like something went wrong. No help can be shown for this command path.", CommandExceptionReason.CommandError);
@@ -407,11 +410,11 @@ namespace TS3AudioBot
 			DateTime tillTime;
 			switch (time.ToLower(CultureInfo.InvariantCulture))
 			{
-			case "hour": tillTime = DateTime.Now.AddHours(-1); break;
-			case "today": tillTime = DateTime.Today; break;
-			case "yesterday": tillTime = DateTime.Today.AddDays(-1); break;
-			case "week": tillTime = DateTime.Today.AddDays(-7); break;
-			default: throw new CommandException("Not recognized time desciption.", CommandExceptionReason.CommandError);
+				case "hour": tillTime = DateTime.Now.AddHours(-1); break;
+				case "today": tillTime = DateTime.Today; break;
+				case "yesterday": tillTime = DateTime.Today.AddDays(-1); break;
+				case "week": tillTime = DateTime.Today.AddDays(-7); break;
+				default: throw new CommandException("Not recognized time desciption.", CommandExceptionReason.CommandError);
 			}
 			var query = new SeachQuery { LastInvokedAfter = tillTime };
 			var results = info.Bot.HistoryManager.Search(query).ToArray();
@@ -440,13 +443,13 @@ namespace TS3AudioBot
 			Func<double, double, bool> comparer;
 			switch (cmp)
 			{
-			case "<": comparer = (a, b) => a < b; break;
-			case ">": comparer = (a, b) => a > b; break;
-			case "<=": comparer = (a, b) => a <= b; break;
-			case ">=": comparer = (a, b) => a >= b; break;
-			case "==": comparer = (a, b) => a == b; break;
-			case "!=": comparer = (a, b) => a != b; break;
-			default: throw new CommandException("Unknown comparison operator", CommandExceptionReason.CommandError);
+				case "<": comparer = (a, b) => a < b; break;
+				case ">": comparer = (a, b) => a > b; break;
+				case "<=": comparer = (a, b) => a <= b; break;
+				case ">=": comparer = (a, b) => a >= b; break;
+				case "==": comparer = (a, b) => a == b; break;
+				case "!=": comparer = (a, b) => a != b; break;
+				default: throw new CommandException("Unknown comparison operator", CommandExceptionReason.CommandError);
 			}
 
 			bool cmpResult;

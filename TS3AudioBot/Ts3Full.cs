@@ -173,7 +173,7 @@ namespace TS3AudioBot
 						verionSign = (VersionSign)signType.GetValue(null);
 				}
 
-				if(verionSign == null)
+				if (verionSign == null)
 				{
 					Log.Write(Log.Level.Warning, "Invalid version sign, falling back to unknown :P");
 					verionSign = VersionSign.VER_WIN_3_UNKNOWN;
@@ -200,31 +200,31 @@ namespace TS3AudioBot
 		{
 			switch (e.Id)
 			{
-			case Ts3ErrorCode.whisper_no_targets:
-				stallNoErrorCount = 0;
-				isStall = true;
-				break;
+				case Ts3ErrorCode.whisper_no_targets:
+					stallNoErrorCount = 0;
+					isStall = true;
+					break;
 
-			case Ts3ErrorCode.client_could_not_validate_identity:
-				if (ts3FullClientData.IdentityLevel == "auto")
-				{
-					int targetSecLevel = int.Parse(e.ExtraMessage);
-					Log.Write(Log.Level.Info, "Calculating up to required security level: {0}", targetSecLevel);
-					Ts3Crypt.ImproveSecurity(identity, targetSecLevel);
-					ts3FullClientData.IdentityOffset = identity.ValidKeyOffset;
+				case Ts3ErrorCode.client_could_not_validate_identity:
+					if (ts3FullClientData.IdentityLevel == "auto")
+					{
+						int targetSecLevel = int.Parse(e.ExtraMessage);
+						Log.Write(Log.Level.Info, "Calculating up to required security level: {0}", targetSecLevel);
+						Ts3Crypt.ImproveSecurity(identity, targetSecLevel);
+						ts3FullClientData.IdentityOffset = identity.ValidKeyOffset;
 
-					ConnectClient();
-				}
-				else
-				{
-					Log.Write(Log.Level.Warning, "The server reported that the security level you set is not high enough." +
-												 "Increase the value to \"{0}\" or set it to \"auto\" to generate it on demand when connecting.", e.ExtraMessage);
-				}
-				break;
+						ConnectClient();
+					}
+					else
+					{
+						Log.Write(Log.Level.Warning, "The server reported that the security level you set is not high enough." +
+													 "Increase the value to \"{0}\" or set it to \"auto\" to generate it on demand when connecting.", e.ExtraMessage);
+					}
+					break;
 
-			default:
-				Log.Write(Log.Level.Debug, "Got ts3 error event: {0}", e.ErrorFormat());
-				break;
+				default:
+					Log.Write(Log.Level.Debug, "Got ts3 error event: {0}", e.ErrorFormat());
+					break;
 			}
 		}
 
@@ -311,34 +311,34 @@ namespace TS3AudioBot
 
 					switch (SendMode)
 					{
-					case TargetSendMode.None:
-						doSend = false;
-						break;
-					case TargetSendMode.Voice:
-						break;
-					case TargetSendMode.Whisper:
-					case TargetSendMode.WhisperGroup:
-						if (isStall)
-						{
-							if (++stallCount % StallCountInterval == 0)
+						case TargetSendMode.None:
+							doSend = false;
+							break;
+						case TargetSendMode.Voice:
+							break;
+						case TargetSendMode.Whisper:
+						case TargetSendMode.WhisperGroup:
+							if (isStall)
 							{
-								stallNoErrorCount++;
-								if (stallNoErrorCount > StallNoErrorCountMax)
+								if (++stallCount % StallCountInterval == 0)
 								{
-									stallCount = 0;
-									isStall = false;
+									stallNoErrorCount++;
+									if (stallNoErrorCount > StallNoErrorCountMax)
+									{
+										stallCount = 0;
+										isStall = false;
+									}
+								}
+								else
+								{
+									doSend = false;
 								}
 							}
-							else
-							{
-								doSend = false;
-							}
-						}
-						if (SendMode == TargetSendMode.Whisper)
-							doSend &= channelSubscriptionsCache.Length > 0 || clientSubscriptionsCache.Length > 0;
-						break;
-					default:
-						throw new InvalidOperationException();
+							if (SendMode == TargetSendMode.Whisper)
+								doSend &= channelSubscriptionsCache.Length > 0 || clientSubscriptionsCache.Length > 0;
+							break;
+						default:
+							throw new InvalidOperationException();
 					}
 
 					// Save cpu when we know there is noone to send to
@@ -353,15 +353,15 @@ namespace TS3AudioBot
 						var packet = encoder.GetPacket();
 						switch (SendMode)
 						{
-						case TargetSendMode.Voice:
-							tsFullClient.SendAudio(packet.Array, packet.Length, encoder.Codec);
-							break;
-						case TargetSendMode.Whisper:
-							tsFullClient.SendAudioWhisper(packet.Array, packet.Length, encoder.Codec, channelSubscriptionsCache, clientSubscriptionsCache);
-							break;
-						case TargetSendMode.WhisperGroup:
-							tsFullClient.SendAudioGroupWhisper(packet.Array, packet.Length, encoder.Codec, GroupWhisperType, GroupWhisperTarget);
-							break;
+							case TargetSendMode.Voice:
+								tsFullClient.SendAudio(packet.Array, packet.Length, encoder.Codec);
+								break;
+							case TargetSendMode.Whisper:
+								tsFullClient.SendAudioWhisper(packet.Array, packet.Length, encoder.Codec, channelSubscriptionsCache, clientSubscriptionsCache);
+								break;
+							case TargetSendMode.WhisperGroup:
+								tsFullClient.SendAudioGroupWhisper(packet.Array, packet.Length, encoder.Codec, GroupWhisperType, GroupWhisperTarget);
+								break;
 						}
 						encoder.ReturnPacket(packet.Array);
 					}
@@ -651,5 +651,7 @@ namespace TS3AudioBot
 		public string DefaultChannel { get; set; }
 		[Info("The password for the default channel. Leave empty for none. Not required with permission b_channel_join_ignore_password", "")]
 		public string DefaultChannelPassword { get; set; }
+		[Info("The client badges. You can set a comma seperate string with max three GUID's. Here is a list: http://yat.qa/ressourcen/abzeichen-badges/", "overwolf=0:badges=")]
+		public string ClientBadges { get; set; }
 	}
 }
